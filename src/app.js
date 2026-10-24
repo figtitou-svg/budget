@@ -5,8 +5,9 @@ import { createActions } from './actions.js';
 import { createSheets } from './ui/sheet.js';
 import { renderMonth } from './ui/month.js';
 import { renderTrends } from './ui/trends.js';
+import { renderImport } from './ui/import.js';
 
-const VIEWS = { mois: renderMonth, evolution: renderTrends };
+const VIEWS = { mois: renderMonth, evolution: renderTrends, import: renderImport };
 
 const localToday = () => {
   const d = new Date();
