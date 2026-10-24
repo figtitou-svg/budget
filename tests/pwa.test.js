@@ -14,6 +14,13 @@ test('le service worker précache tous les fichiers de l’app', () => {
   for (const f of files) assert.ok(sw.includes(`'${f}'`), `manquant dans sw.js : ${f}`);
 });
 
+test('chaque entrée du précache existe sur le disque', () => {
+  const sw = read('sw.js').toString();
+  const assets = [...sw.match(/const ASSETS = \[([\s\S]*?)\];/)[1].matchAll(/'(\.[^']*)'/g)].map((m) => m[1]);
+  assert.ok(assets.length > 20);
+  for (const a of assets) assert.ok(existsSync(new URL(a === './' ? 'index.html' : a, root)), `absent du disque : ${a}`);
+});
+
 test('manifeste valide et icônes PNG aux bonnes dimensions', () => {
   const m = JSON.parse(read('manifest.webmanifest'));
   assert.equal(m.start_url, './');

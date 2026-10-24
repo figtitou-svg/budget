@@ -17,6 +17,12 @@ test('aller-retour complet', () => {
   assert.deepEqual(back.settings, data.settings);
 });
 
+test('refuse une sauvegarde dont les catégories sont invalides', () => {
+  for (const categories of [[{ name: 'x' }], ['autre'], [null]]) {
+    assert.throws(() => parseBackup(JSON.stringify({ version: 1, transactions: [T], categories })), { code: 'BAD_BACKUP' });
+  }
+});
+
 test('refuse les fichiers invalides', () => {
   for (const text of ['pas du json', 'null', '{"version":2,"transactions":[]}', JSON.stringify({ version: 1, transactions: [{ ...T, amountCents: 1.5 }] }), JSON.stringify({ version: 1, transactions: [{ id: 'a' }] })]) {
     assert.throws(() => parseBackup(text), { code: 'BAD_BACKUP' }, text);

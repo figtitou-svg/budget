@@ -32,8 +32,9 @@ class Store {
 
   async #write(stores, fn) {
     const tx = this.db.transaction(stores, 'readwrite');
-    fn(tx);
-    await done(tx);
+    const finished = done(tx);
+    try { fn(tx); } catch (e) { finished.catch(() => {}); tx.abort(); throw e; }
+    await finished;
   }
 
   // Ajouts et suppressions dans une seule transaction : tout ou rien.

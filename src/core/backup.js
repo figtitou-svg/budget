@@ -25,6 +25,7 @@ export function parseBackup(text) {
   const rules = data.rules ?? [];
   const categories = data.categories ?? [];
   if (!Array.isArray(rules) || !Array.isArray(categories)) throw bad();
+  if (!categories.every((c) => c && typeof c === 'object' && typeof c.id === 'string')) throw bad();
   return {
     transactions: data.transactions,
     rules: new Map(rules.filter((r) => r && r.merchant && r.categoryId).map((r) => [r.merchant, r.categoryId])),
