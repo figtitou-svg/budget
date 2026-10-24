@@ -4,13 +4,13 @@
     {
       "id": 0,
       "subject": "Task 0: Scaffolding du projet",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** Squelette du dépôt : `package.json`, serveur de dev, config de prévisualisation, classe d'erreur partagée et premier test vert.\n\n**Files:**\n- Create: `package.json`, `.gitignore`, `.claude/launch.json`, `scripts/serve.mjs`, `src/core/errors.js`\n- Test: `tests/errors.test.js`\n\n**Acceptance Criteria:**\n- [ ] `npm test` passe (1 test) depuis la racine\n- [ ] `node scripts/serve.mjs` sert `index.html` absent → 404 texte, et refuse `..` (403/404)\n- [ ] `ImportError` expose `code`, `message`, `details`, `name === 'ImportError'`\n\n**Verify:** `npm test` → `# pass 1`, `# fail 0`\n\n```json:metadata\n{\"files\":[\"package.json\",\"package.json\",\".claude/launch.json\",\"scripts/serve.mjs\",\"src/core/errors.js\",\"tests/errors.test.js\"],\"verifyCommand\":\"`npm test` → `# pass 1`, `# fail 0`\",\"acceptanceCriteria\":[\"`npm test` passe (1 test) depuis la racine\",\"`node scripts/serve.mjs` sert `index.html` absent → 404 texte, et refuse `..` (403/404)\",\"`ImportError` expose `code`, `message`, `details`, `name === 'ImportError'`\"],\"modelTier\":\"mechanical\"}\n```"
     },
     {
       "id": 1,
       "subject": "Task 1: Décodage des octets",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** `decodeBytes` transforme les octets d'un fichier en texte, en UTF-8 ou en Windows-1252 si l'UTF-8 est invalide, sans BOM.\n\n**Files:**\n- Create: `src/core/decode.js`\n- Test: `tests/decode.test.js`\n\n**Acceptance Criteria:**\n- [ ] UTF-8 valide décodé tel quel ; Latin-1/Windows-1252 (`é` = 0xE9, `€` = 0x80) décodé correctement\n- [ ] BOM UTF-8 retiré ; accepte `Uint8Array` et `ArrayBuffer`\n\n**Verify:** `node --test tests/decode.test.js` → 5 pass\n\n```json:metadata\n{\"files\":[\"src/core/decode.js\",\"tests/decode.test.js\"],\"verifyCommand\":\"`node --test tests/decode.test.js` → 5 pass\",\"acceptanceCriteria\":[\"UTF-8 valide décodé tel quel ; Latin-1/Windows-1252 (`é` = 0xE9, `€` = 0x80) décodé correctement\",\"BOM UTF-8 retiré ; accepte `Uint8Array` et `ArrayBuffer`\"],\"modelTier\":\"standard\"}\n```",
       "blockedBy": [
         0
@@ -19,7 +19,7 @@
     {
       "id": 2,
       "subject": "Task 2: Lecture du CSV Société Générale",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** `parseSgCsv(text, { mapping })` extrait `{ rows: [{date, amountCents, rawLabel}], skipped }` d'un export CSV SG (ou de tout CSV avec un mapping fourni), et lève `ImportError` `NO_HEADER` (avec aperçu) ou `NO_ROWS`.\n\n**Files:**\n- Create: `src/core/parse-sg-csv.js`\n- Test: `tests/parse-sg-csv.test.js`\n\n**Acceptance Criteria:**\n- [ ] `parseAmount` : `-23,45`→-2345, `1 234,56`→123456, `1.234,56`→123456, `12.5`→1250, `+3`→300, `1 000,00`→100000, `-5,20 EUR`→-520, `''`/`abc`→null\n- [ ] `parseDate` : `12/10/2026`→`2026-10-12`, `1/2/26`→`2026-02-01`, `2026-10-12`→idem, `31/02/2026`→null\n- [ ] Format SG classique (lignes de compte avant l'en-tête, `Date de l'opération;Libellé;Détail de l'écriture;Montant de l'opération;Devise`) → 3 lignes, libellé = le plus complet\n- [ ] Format Débit/Crédit avec « Date opération » prioritaire sur « Date de comptabilisation »\n- [ ] Cellules `=\"…\"` et `;` entre guillemets gérés\n- [ ] En-tête introuvable → `NO_HEADER` avec `details.sep` et `details.preview` ; avec `mapping` → lignes lues ; aucune ligne → `NO_ROWS`\n\n**Verify:** `node --test tests/parse-sg-csv.test.js` → tout passe\n\n```json:metadata\n{\"files\":[\"src/core/parse-sg-csv.js\",\"tests/parse-sg-csv.test.js\"],\"verifyCommand\":\"`node --test tests/parse-sg-csv.test.js` → tout passe\",\"acceptanceCriteria\":[\"`parseAmount` : `-23,45`→-2345, `1 234,56`→123456, `1.234,56`→123456, `12.5`→1250, `+3`→300, `1 000,00`→100000, `-5,20 EUR`→-520, `''`/`abc`→null\",\"`parseDate` : `12/10/2026`→`2026-10-12`, `1/2/26`→`2026-02-01`, `2026-10-12`→idem, `31/02/2026`→null\",\"Format SG classique (lignes de compte avant l'en-tête, `Date de l'opération;Libellé;Détail de l'écriture;Montant de l'opération;Devise`) → 3 lignes, libellé = le plus complet\",\"Format Débit/Crédit avec « Date opération » prioritaire sur « Date de comptabilisation »\",\"Cellules `=\\\"…\\\"` et `;` entre guillemets gérés\",\"En-tête introuvable → `NO_HEADER` avec `details.sep` et `details.preview` ; avec `mapping` → lignes lues ; aucune ligne → `NO_ROWS`\"],\"modelTier\":\"standard\"}\n```",
       "blockedBy": [
         1
@@ -28,7 +28,7 @@
     {
       "id": 3,
       "subject": "Task 3: Lecture de l'OFX",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** `parseOfx(text)` lit les blocs `<STMTTRN>` (SGML sans balises fermantes ou XML) et `isOfx(text)` détecte le format.\n\n**Files:**\n- Create: `src/core/parse-ofx.js`\n- Test: `tests/parse-ofx.test.js`\n\n**Acceptance Criteria:**\n- [ ] SGML : 2 opérations, date `DTPOSTED` avec heure/fuseau tronquée, montant `-23.45` et `120,00`\n- [ ] XML : entités `&amp;` décodées\n- [ ] Aucun bloc → `NO_ROWS` ; `isOfx` vrai pour `OFXHEADER` ou `<OFX>`, faux pour un CSV\n\n**Verify:** `node --test tests/parse-ofx.test.js` → tout passe\n\n```json:metadata\n{\"files\":[\"src/core/parse-ofx.js\",\"tests/parse-ofx.test.js\"],\"verifyCommand\":\"`node --test tests/parse-ofx.test.js` → tout passe\",\"acceptanceCriteria\":[\"SGML : 2 opérations, date `DTPOSTED` avec heure/fuseau tronquée, montant `-23.45` et `120,00`\",\"XML : entités `&amp;` décodées\",\"Aucun bloc → `NO_ROWS` ; `isOfx` vrai pour `OFXHEADER` ou `<OFX>`, faux pour un CSV\"],\"modelTier\":\"standard\"}\n```",
       "blockedBy": [
         2
@@ -37,7 +37,7 @@
     {
       "id": 4,
       "subject": "Task 4: Normalisation des libellés en commerçants",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** `normalizeMerchant(rawLabel)` renvoie un nom de commerçant court et stable (majuscules, sans accents, sans préfixes bancaires, références, dates ni ville finale) ; `foldUpper` est réutilisé par la catégorisation.\n\n**Files:**\n- Create: `src/core/normalize.js`\n- Test: `tests/normalize.test.js`\n\n**Acceptance Criteria:**\n- [ ] Tous les cas du tableau de test donnent le résultat attendu\n- [ ] Un libellé qui serait vidé par le nettoyage renvoie le libellé replié d'origine\n\n**Verify:** `node --test tests/normalize.test.js` → tout passe\n\n```json:metadata\n{\"files\":[\"src/core/normalize.js\",\"tests/normalize.test.js\"],\"verifyCommand\":\"`node --test tests/normalize.test.js` → tout passe\",\"acceptanceCriteria\":[\"Tous les cas du tableau de test donnent le résultat attendu\",\"Un libellé qui serait vidé par le nettoyage renvoie le libellé replié d'origine\"],\"modelTier\":\"standard\"}\n```",
       "blockedBy": [
         3
@@ -46,7 +46,7 @@
     {
       "id": 5,
       "subject": "Task 5: Catégories et catégorisation",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** Liste des 15 catégories par défaut, catégorisation automatique par mots-clés (dépenses/recettes séparées), priorité manuel > règle > défaut, application d'une règle à un commerçant et saisie manuelle.\n\n**Files:**\n- Create: `src/core/categories.js`, `src/core/categorize.js`\n- Test: `tests/categorize.test.js`\n\n**Acceptance Criteria:**\n- [ ] `DEFAULT_CATEGORIES` : 15 entrées `{id, name, color (#rrggbb), icon, order}` aux ids uniques, dont `autre`, `revenus`, `remboursements`\n- [ ] Chaque ligne du tableau de test reçoit la catégorie attendue (dont carte positive → `remboursements`, inconnu → `autre`)\n- [ ] `categorize` : `manual` conservé, règle prioritaire sur le défaut\n- [ ] `applyRule` ne touche pas les `manual` sauf `includeId`, et garde les mêmes références pour les opérations inchangées ; `setManual` marque `manual`\n\n**Verify:** `node --test tests/categorize.test.js` → tout passe\n\n```json:metadata\n{\"files\":[\"src/core/categories.js\",\"src/core/categorize.js\",\"tests/categorize.test.js\"],\"verifyCommand\":\"`node --test tests/categorize.test.js` → tout passe\",\"acceptanceCriteria\":[\"`DEFAULT_CATEGORIES` : 15 entrées `{id, name, color (#rrggbb), icon, order}` aux ids uniques, dont `autre`, `revenus`, `remboursements`\",\"Chaque ligne du tableau de test reçoit la catégorie attendue (dont carte positive → `remboursements`, inconnu → `autre`)\",\"`categorize` : `manual` conservé, règle prioritaire sur le défaut\",\"`applyRule` ne touche pas les `manual` sauf `includeId`, et garde les mêmes références pour les opérations inchangées ; `setManual` marque `manual`\"],\"modelTier\":\"standard\"}\n```",
       "blockedBy": [
         4
@@ -55,7 +55,7 @@
     {
       "id": 6,
       "subject": "Task 6: Doublons",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** Empreinte stable d'une opération, ids `empreinte#n` par rang d'occurrence dans un fichier, et séparation nouveautés / doublons.\n\n**Files:**\n- Create: `src/core/dedupe.js`\n- Test: `tests/dedupe.test.js`\n\n**Acceptance Criteria:**\n- [ ] `fingerprint` ignore casse et espaces multiples du libellé\n- [ ] Deux lignes identiques d'un même fichier → `#1` et `#2`\n- [ ] Relevés qui se chevauchent `[a, b, b]` puis `[b, b, c]` → seul `c` est nouveau\n\n**Verify:** `node --test tests/dedupe.test.js` → tout passe\n\n```json:metadata\n{\"files\":[\"src/core/dedupe.js\",\"tests/dedupe.test.js\"],\"verifyCommand\":\"`node --test tests/dedupe.test.js` → tout passe\",\"acceptanceCriteria\":[\"`fingerprint` ignore casse et espaces multiples du libellé\",\"Deux lignes identiques d'un même fichier → `#1` et `#2`\",\"Relevés qui se chevauchent `[a, b, b]` puis `[b, b, c]` → seul `c` est nouveau\"],\"modelTier\":\"standard\"}\n```",
       "blockedBy": [
         5
@@ -64,7 +64,7 @@
     {
       "id": 7,
       "subject": "Task 7: Pipeline d'import et correspondance de colonnes",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** `planImport(bytes, opts)` transforme un fichier en opérations prêtes à enregistrer (commerçant, catégorie, id) en séparant les doublons ; `buildMapping(roles, sep)` transforme les choix de l'écran de correspondance en mapping. C'est aussi le point d'entrée d'un futur connecteur : `toTransactions(rows, rules, importedAt)`.\n\n**Files:**\n- Create: `src/core/import.js`, `src/core/mapping.js`\n- Test: `tests/import.test.js`, `tests/mapping.test.js`\n\n**Acceptance Criteria:**\n- [ ] CSV SG encodé en Latin-1 → 3 opérations ajoutées avec commerçant et catégorie\n- [ ] Réimport du même fichier avec `existingIds` → 0 ajout, 3 doublons\n- [ ] Règle apprise appliquée (`categorySource: 'rule'`)\n- [ ] PDF/binaire → `NOT_TEXT` ; fichier vide → `EMPTY` ; OFX reconnu\n- [ ] `buildMapping` : erreurs claires sans date / sans libellé / sans montant ; mapping montant ou débit/crédit sinon\n\n**Verify:** `node --test tests/import.test.js tests/mapping.test.js` → tout passe\n\n```json:metadata\n{\"files\":[\"src/core/import.js\",\"src/core/mapping.js\",\"tests/import.test.js\",\"tests/mapping.test.js\"],\"verifyCommand\":\"`node --test tests/import.test.js tests/mapping.test.js` → tout passe\",\"acceptanceCriteria\":[\"CSV SG encodé en Latin-1 → 3 opérations ajoutées avec commerçant et catégorie\",\"Réimport du même fichier avec `existingIds` → 0 ajout, 3 doublons\",\"Règle apprise appliquée (`categorySource: 'rule'`)\",\"PDF/binaire → `NOT_TEXT` ; fichier vide → `EMPTY` ; OFX reconnu\",\"`buildMapping` : erreurs claires sans date / sans libellé / sans montant ; mapping montant ou débit/crédit sinon\"],\"modelTier\":\"standard\"}\n```",
       "blockedBy": [
         6
@@ -73,7 +73,7 @@
     {
       "id": 8,
       "subject": "Task 8: Statistiques",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** Résumé d'un mois (dépensé, reçu, solde, répartition par catégorie), liste des mois, navigation entre mois, opérations d'une catégorie, et tendance sur N mois avec moyenne et écart.\n\n**Files:**\n- Create: `src/core/stats.js`\n- Test: `tests/stats.test.js`\n\n**Acceptance Criteria:**\n- [ ] `monthSummary` octobre : dépensé 5000, reçu 50000, solde 45000, courses 80 % / resto 20 %\n- [ ] `shiftMonth` franchit les années dans les deux sens\n- [ ] `trend` : mois croissants, séries triées par total, moyenne des mois précédents à partir du premier mois avec des données, écart du dernier mois ; moyenne `null` sans historique\n\n**Verify:** `node --test tests/stats.test.js` → tout passe\n\n```json:metadata\n{\"files\":[\"src/core/stats.js\",\"tests/stats.test.js\"],\"verifyCommand\":\"`node --test tests/stats.test.js` → tout passe\",\"acceptanceCriteria\":[\"`monthSummary` octobre : dépensé 5000, reçu 50000, solde 45000, courses 80 % / resto 20 %\",\"`shiftMonth` franchit les années dans les deux sens\",\"`trend` : mois croissants, séries triées par total, moyenne des mois précédents à partir du premier mois avec des données, écart du dernier mois ; moyenne `null` sans historique\"],\"modelTier\":\"standard\"}\n```",
       "blockedBy": [
         7
@@ -82,7 +82,7 @@
     {
       "id": 9,
       "subject": "Task 9: Sauvegarde JSON et données de démo",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** Construire et valider une sauvegarde JSON versionnée ; générer six mois de données de démo réalistes et déterministes, toutes catégorisées.\n\n**Files:**\n- Create: `src/core/backup.js`, `src/core/demo.js`\n- Test: `tests/backup.test.js`, `tests/demo.test.js`\n\n**Acceptance Criteria:**\n- [ ] Aller-retour `buildBackup` → `JSON.stringify` → `parseBackup` restitue opérations, règles (Map), catégories, réglages\n- [ ] JSON invalide, mauvaise version ou opération incomplète → `ImportError` `BAD_BACKUP`\n- [ ] Démo : même graine → mêmes données ; 6 mois se terminant au mois de `today` ; aucune date après `today` ; aucune opération `autre` ; toutes marquées `demo: true` ; au moins 8 catégories utilisées\n\n**Verify:** `node --test tests/backup.test.js tests/demo.test.js` → tout passe\n\n```json:metadata\n{\"files\":[\"src/core/backup.js\",\"src/core/demo.js\",\"tests/backup.test.js\",\"tests/demo.test.js\"],\"verifyCommand\":\"`node --test tests/backup.test.js tests/demo.test.js` → tout passe\",\"acceptanceCriteria\":[\"Aller-retour `buildBackup` → `JSON.stringify` → `parseBackup` restitue opérations, règles (Map), catégories, réglages\",\"JSON invalide, mauvaise version ou opération incomplète → `ImportError` `BAD_BACKUP`\",\"Démo : même graine → mêmes données ; 6 mois se terminant au mois de `today` ; aucune date après `today` ; aucune opération `autre` ; toutes marquées `demo: true` ; au moins 8 catégories utilisées\"],\"modelTier\":\"standard\"}\n```",
       "blockedBy": [
         8
@@ -91,7 +91,7 @@
     {
       "id": 10,
       "subject": "Task 10: Formatage et graphiques SVG",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** Fonctions pures de formatage français (euros, mois, jours, pourcentages, échappement HTML) et générateurs SVG (donut, barres empilées avec ligne de moyenne).\n\n**Files:**\n- Create: `src/ui/format.js`, `src/ui/charts.js`\n- Test: `tests/format.test.js`, `tests/charts.test.js`\n\n**Acceptance Criteria:**\n- [ ] `formatEuros(-2345)` → `-23,45 €` (espaces insécables normalisés pour le test), `{ signed: true }` affiche `+`\n- [ ] `formatMonth('2026-10')` → `octobre 2026` ; `formatMonthShort` → `oct.` ; `formatDay('2026-10-12')` → `12 oct.`\n- [ ] `escapeHtml` échappe `& < > \" '`\n- [ ] Donut : un arc par part non nulle + une piste ; total nul → piste seule ; textes échappés\n- [ ] Barres : la plus haute colonne occupe toute la hauteur utile ; ligne de moyenne présente seulement si fournie\n\n**Verify:** `node --test tests/format.test.js tests/charts.test.js` → tout passe\n\n```json:metadata\n{\"files\":[\"src/ui/format.js\",\"src/ui/charts.js\",\"tests/format.test.js\",\"tests/charts.test.js\"],\"verifyCommand\":\"`node --test tests/format.test.js tests/charts.test.js` → tout passe\",\"acceptanceCriteria\":[\"`formatEuros(-2345)` → `-23,45 €` (espaces insécables normalisés pour le test), `{ signed: true }` affiche `+`\",\"`formatMonth('2026-10')` → `octobre 2026` ; `formatMonthShort` → `oct.` ; `formatDay('2026-10-12')` → `12 oct.`\",\"`escapeHtml` échappe `& < > \\\" '`\",\"Donut : un arc par part non nulle + une piste ; total nul → piste seule ; textes échappés\",\"Barres : la plus haute colonne occupe toute la hauteur utile ; ligne de moyenne présente seulement si fournie\"],\"modelTier\":\"standard\"}\n```",
       "blockedBy": [
         9
@@ -100,7 +100,7 @@
     {
       "id": 11,
       "subject": "Task 11: Infrastructure navigateur (stockage, feuilles, acti",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** Tout ce dont les écrans ont besoin : persistance IndexedDB (avec repli mémoire), feuille modale et confirmation, actions métier (import, recatégorisation, démo, sauvegarde, effacement, catégories), page HTML et feuille de style mobile.\n\n**Files:**\n- Create: `src/store.js`, `src/ui/sheet.js`, `src/actions.js`, `index.html`, `styles.css`\n\n**Acceptance Criteria:**\n- [ ] `node --check` passe sur `src/store.js`, `src/ui/sheet.js`, `src/actions.js`\n- [ ] `npm test` reste vert\n- [ ] `index.html` charge `styles.css`, `manifest.webmanifest`, `src/app.js` en chemins relatifs, contient `#banner`, `#view`, `nav.tabs` (3 liens `#mois`, `#evolution`, `#import`), `dialog#sheet`, `dialog#confirm`, `#toast`\n\n**Verify:** `node --check src/store.js && node --check src/ui/sheet.js && node --check src/actions.js && npm test` → aucune erreur, tests verts\n\n```json:metadata\n{\"files\":[\"src/store.js\",\"src/ui/sheet.js\",\"src/actions.js\",\"index.html\",\"styles.css\"],\"verifyCommand\":\"`node --check src/store.js && node --check src/ui/sheet.js && node --check src/actions.js && npm test` → aucune erreur, tests verts\",\"acceptanceCriteria\":[\"`node --check` passe sur `src/store.js`, `src/ui/sheet.js`, `src/actions.js`\",\"`npm test` reste vert\",\"`index.html` charge `styles.css`, `manifest.webmanifest`, `src/app.js` en chemins relatifs, contient `#banner`, `#view`, `nav.tabs` (3 liens `#mois`, `#evolution`, `#import`), `dialog#sheet`, `dialog#confirm`, `#toast`\"],\"modelTier\":\"standard\"}\n```",
       "blockedBy": [
         10
@@ -109,7 +109,7 @@
     {
       "id": 12,
       "subject": "Task 12: Application et écran Mois",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** `src/app.js` (état, routage par hash, toasts, bannière, démarrage) et l'écran Mois complet : état vide, navigation entre mois, cartes Dépensé/Reçu/Solde, donut, catégories dépliables, choix de catégorie d'une opération avec proposition de règle.\n\n**Files:**\n- Create: `src/app.js`, `src/ui/month.js`, `src/ui/category-sheet.js`\n\n**Acceptance Criteria:**\n- [ ] Au premier chargement (base vide) : état vide avec « Importer un relevé » et « Essayer avec des données de démo »\n- [ ] Démo chargée → mois courant affiché, total du donut = carte Dépensé, flèche › désactivée sur le dernier mois, ‹ désactivée sur le premier\n- [ ] Tap catégorie → liste des opérations ; tap opération → feuille de catégories ; choix + « Oui, toutes » → règle enregistrée, toutes les opérations du commerçant déplacées, persistant après rechargement\n- [ ] Aucune erreur dans la console\n\n**Verify:** `npm test` vert, puis dans le navigateur intégré (`preview_start` nommé `budget`, viewport `mobile`) : parcours des critères ci-dessus, `read_console_messages` avec `onlyErrors` → vide\n\n```json:metadata\n{\"files\":[\"src/app.js\",\"src/app.js\",\"src/ui/month.js\",\"src/ui/category-sheet.js\"],\"verifyCommand\":\"`npm test` vert, puis dans le navigateur intégré (`preview_start` nommé `budget`, viewport `mobile`) : parcours des critères ci-dessus, `read_console_messages` avec `onlyErrors` → vide\",\"acceptanceCriteria\":[\"Au premier chargement (base vide) : état vide avec « Importer un relevé » et « Essayer avec des données de démo »\",\"Démo chargée → mois courant affiché, total du donut = carte Dépensé, flèche › désactivée sur le dernier mois, ‹ désactivée sur le premier\",\"Tap catégorie → liste des opérations ; tap opération → feuille de catégories ; choix + « Oui, toutes » → règle enregistrée, toutes les opérations du commerçant déplacées, persistant après rechargement\",\"Aucune erreur dans la console\"],\"modelTier\":\"standard\"}\n```",
       "blockedBy": [
         11
@@ -118,7 +118,7 @@
     {
       "id": 13,
       "subject": "Task 13: Écran Évolution",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** Barres empilées par catégorie sur 6 ou 12 mois, filtre par catégorie, cartes mois courant / moyenne / écart et légende avec totaux.\n\n**Files:**\n- Create: `src/ui/trends.js`\n- Modify: `src/app.js` (import + entrée `evolution` dans `VIEWS`)\n\n**Acceptance Criteria:**\n- [ ] Onglet Évolution : 6 barres par défaut, bouton « 12 mois » → 12 barres\n- [ ] Filtre « Courses » → seule la couleur Courses apparaît, la moyenne et l'écart changent\n- [ ] Sans données : message et lien vers l'import\n\n**Verify:** navigateur intégré, viewport mobile : `#evolution` → `document.querySelectorAll('.bars .bar-label').length === 6`, puis 12 après clic ; filtre vérifié ; console sans erreur nouvelle\n\n```json:metadata\n{\"files\":[\"src/ui/trends.js\",\"src/app.js\"],\"verifyCommand\":\"navigateur intégré, viewport mobile : `#evolution` → `document.querySelectorAll('.bars .bar-label').length === 6`, puis 12 après clic ; filtre vérifié ; console sans erreur nouvelle\",\"acceptanceCriteria\":[\"Onglet Évolution : 6 barres par défaut, bouton « 12 mois » → 12 barres\",\"Filtre « Courses » → seule la couleur Courses apparaît, la moyenne et l'écart changent\",\"Sans données : message et lien vers l'import\"],\"modelTier\":\"standard\"}\n```",
       "blockedBy": [
         12
@@ -127,7 +127,7 @@
     {
       "id": 14,
       "subject": "Task 14: Écran Import et réglages",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** Import d'un relevé (bouton fichier), résumé du dernier import, écran de correspondance des colonnes quand le format est inconnu, aide pour exporter depuis SG, édition des catégories (nom, couleur), export/restauration JSON, démo, effacement.\n\n**Files:**\n- Create: `src/ui/import.js`\n- Modify: `src/app.js` (import + entrée `import` dans `VIEWS`)\n\n**Acceptance Criteria:**\n- [ ] Choisir un CSV SG → toast « N opérations ajoutées », résumé (ajoutées, doublons, non catégorisées avec lien), données de démo retirées si présentes\n- [ ] Fichier aux colonnes inconnues → tableau d'aperçu avec un sélecteur par colonne ; validation sans date → message d'erreur ; mapping valide → import et mapping mémorisé\n- [ ] Renommer une catégorie ou changer sa couleur → visible sur l'écran Mois, persistant\n- [ ] Export JSON télécharge `budget-sauvegarde-AAAA-MM-JJ.json` ; restauration demande confirmation puis remplace les données\n- [ ] « Tout effacer » demande confirmation puis revient à l'état vide\n\n**Verify:** navigateur intégré (voir Step 3) ; `npm test` vert\n\n```json:metadata\n{\"files\":[\"src/ui/import.js\",\"src/app.js\"],\"verifyCommand\":\"navigateur intégré (voir Step 3) ; `npm test` vert\",\"acceptanceCriteria\":[\"Choisir un CSV SG → toast « N opérations ajoutées », résumé (ajoutées, doublons, non catégorisées avec lien), données de démo retirées si présentes\",\"Fichier aux colonnes inconnues → tableau d'aperçu avec un sélecteur par colonne ; validation sans date → message d'erreur ; mapping valide → import et mapping mémorisé\",\"Renommer une catégorie ou changer sa couleur → visible sur l'écran Mois, persistant\",\"Export JSON télécharge `budget-sauvegarde-AAAA-MM-JJ.json` ; restauration demande confirmation puis remplace les données\",\"« Tout effacer » demande confirmation puis revient à l'état vide\"],\"modelTier\":\"standard\"}\n```",
       "blockedBy": [
         13
@@ -136,7 +136,7 @@
     {
       "id": 15,
       "subject": "Task 15: PWA installable et hors-ligne",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** Manifeste, icônes PNG générées sans dépendance, service worker cache-first qui précache tous les fichiers, enregistrement du service worker, et un test qui garantit que la liste du cache reste complète.\n\n**Files:**\n- Create: `manifest.webmanifest`, `icons/icon.svg`, `scripts/make-icons.mjs`, `icons/icon-192.png`, `icons/icon-512.png`, `icons/icon-maskable-512.png` (générés), `sw.js`\n- Modify: `src/app.js` (enregistrement du service worker en fin de `init`)\n- Test: `tests/pwa.test.js`\n\n**Acceptance Criteria:**\n- [ ] `npm run icons` écrit 3 PNG valides aux bonnes dimensions\n- [ ] Chaque `src/**/*.js` et chaque fichier racine de l'app figure dans `ASSETS` de `sw.js` (test)\n- [ ] Manifeste : `start_url` et `scope` relatifs, `display: standalone`, icônes 192/512/maskable existantes\n- [ ] Navigateur : `navigator.serviceWorker.controller` non nul après rechargement ; serveur arrêté, rechargement → l'app s'affiche quand même\n\n**Verify:** `npm run icons && npm test` → vert ; contrôle hors-ligne au Step 7\n\n```json:metadata\n{\"files\":[\"manifest.webmanifest\",\"icons/icon.svg\",\"scripts/make-icons.mjs\",\"icons/icon-192.png\",\"icons/icon-512.png\",\"icons/icon-maskable-512.png\",\"sw.js\",\"src/app.js\",\"tests/pwa.test.js\"],\"verifyCommand\":\"`npm run icons && npm test` → vert ; contrôle hors-ligne au Step 7\",\"acceptanceCriteria\":[\"`npm run icons` écrit 3 PNG valides aux bonnes dimensions\",\"Chaque `src/**/*.js` et chaque fichier racine de l'app figure dans `ASSETS` de `sw.js` (test)\",\"Manifeste : `start_url` et `scope` relatifs, `display: standalone`, icônes 192/512/maskable existantes\",\"Navigateur : `navigator.serviceWorker.controller` non nul après rechargement ; serveur arrêté, rechargement → l'app s'affiche quand même\"],\"modelTier\":\"standard\"}\n```",
       "blockedBy": [
         14
@@ -145,12 +145,12 @@
     {
       "id": 16,
       "subject": "Task 16: Relevés fictifs, vérification de bout en bout, READ",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** Générer des relevés SG fictifs réalistes, dérouler le parcours complet sur viewport mobile, corriger ce qui casse, puis écrire le `README.md` (usage, export SG, publication GitHub Pages, installation) et le `RAPPORT.md` (ce qui a été vérifié, ce qui ne l'a pas été, limites, pistes).\n\n**Files:**\n- Create: `scripts/make-fixtures.mjs`, `tests/fixtures/sg-exemple.csv`, `tests/fixtures/sg-chevauchement.csv`, `tests/fixtures/sg-exemple.ofx`, `tests/fixtures/colonnes-inconnues.csv` (générés), `README.md`, `RAPPORT.md`\n- Modify : tout fichier où la vérification révèle un bug (avec un test Node qui reproduit le bug quand il touche `src/core/`)\n\n**Acceptance Criteria:**\n- [ ] `npm run fixtures` écrit les 4 fichiers ; `sg-exemple.csv` est en Windows-1252\n- [ ] Parcours complet réussi en viewport mobile (375×812) et en thème sombre, sans erreur console, sans défilement horizontal (`document.documentElement.scrollWidth <= innerWidth`)\n- [ ] `README.md` et `RAPPORT.md` présents, en français, sans section vide\n- [ ] `npm test` vert ; `git status` propre après le commit\n\n**Verify:** `npm run fixtures && npm test` → vert ; parcours du Step 3 ; `git status --short` → vide\n\n```json:metadata\n{\"files\":[\"README.md\",\"RAPPORT.md\",\"scripts/make-fixtures.mjs\",\"tests/fixtures/sg-exemple.csv\",\"tests/fixtures/sg-chevauchement.csv\",\"tests/fixtures/sg-exemple.ofx\",\"tests/fixtures/colonnes-inconnues.csv\",\"README.md\",\"RAPPORT.md\"],\"verifyCommand\":\"`npm run fixtures && npm test` → vert ; parcours du Step 3 ; `git status --short` → vide\",\"acceptanceCriteria\":[\"`npm run fixtures` écrit les 4 fichiers ; `sg-exemple.csv` est en Windows-1252\",\"Parcours complet réussi en viewport mobile (375×812) et en thème sombre, sans erreur console, sans défilement horizontal (`document.documentElement.scrollWidth <= innerWidth`)\",\"`README.md` et `RAPPORT.md` présents, en français, sans section vide\",\"`npm test` vert ; `git status` propre après le commit\"],\"modelTier\":\"standard\"}\n```",
       "blockedBy": [
         15
       ]
     }
   ],
-  "lastUpdated": "2026-10-24T21:41:27.100Z"
+  "lastUpdated": "2026-10-24T22:26:56.718Z"
 }
