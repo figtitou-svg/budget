@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Budget</title>
+  <meta name="description" content="Où part ton argent : import du relevé SG, catégories automatiques, évolution mois par mois.">
+  <meta name="theme-color" content="#1f8a70">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="src/app.js"></script>
+</head>
+<body>
+  <div id="banner" class="banner" role="alert" hidden></div>
+  <main id="view" class="view"></main>
+  <nav class="tabs" aria-label="Navigation principale">
+    <a href="#mois" data-tab="mois">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v9h9A9 9 0 1 1 12 3z" fill="currentColor" opacity=".35"/><path d="M14 2.2A9 9 0 0 1 21.8 10H14z" fill="currentColor"/></svg>
+      Mois
+    </a>
+    <a href="#evolution" data-tab="evolution">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="11" width="4" height="10" rx="1" fill="currentColor"/><rect x="10" y="6" width="4" height="15" rx="1" fill="currentColor"/><rect x="17" y="3" width="4" height="18" rx="1" fill="currentColor"/></svg>
+      Évolution
+    </a>
+    <a href="#import" data-tab="import">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l5 5h-3v7h-4V8H7z" fill="currentColor"/><rect x="4" y="18" width="16" height="3" rx="1" fill="currentColor"/></svg>
+      Import
+    </a>
+  </nav>
+  <dialog id="sheet" class="sheet"></dialog>
+  <dialog id="confirm" class="sheet"></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
