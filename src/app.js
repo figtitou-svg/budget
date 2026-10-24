@@ -82,6 +82,9 @@ async function init() {
   state.month = listMonths(state.transactions)[0] ?? state.month;
   window.addEventListener('hashchange', () => { window.scrollTo(0, 0); ctx.render(); });
   ctx.render();
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch((e) => console.error('Service worker', e));
+  }
 }
 
 init();
