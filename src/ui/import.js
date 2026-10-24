@@ -129,6 +129,10 @@ export function renderImport(root, ctx) {
         break;
       case 'see-uncat':
         state.openCategory = 'out:autre';
+        {
+          const dates = state.transactions.filter((t) => t.categoryId === 'autre' && t.amountCents < 0).map((t) => t.date).sort();
+          if (dates.length) state.month = dates.at(-1).slice(0, 7);
+        }
         break;
     }
   };
