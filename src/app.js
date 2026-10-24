@@ -4,8 +4,9 @@ import { listMonths } from './core/stats.js';
 import { createActions } from './actions.js';
 import { createSheets } from './ui/sheet.js';
 import { renderMonth } from './ui/month.js';
+import { renderTrends } from './ui/trends.js';
 
-const VIEWS = { mois: renderMonth };
+const VIEWS = { mois: renderMonth, evolution: renderTrends };
 
 const localToday = () => {
   const d = new Date();
