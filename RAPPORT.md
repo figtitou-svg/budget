@@ -3,7 +3,7 @@
 ## Résumé
 
 - Livré : PWA hors-ligne « Budget » (import CSV/OFX Société Générale, catégorisation, écran Mois, écran Évolution, sauvegarde JSON, service worker), README.md, relevés fictifs générés par `npm run fixtures`.
-- Tests : `npm test` → 99 tests, 99 réussis, 0 échec (après le correctif de la nuit).
+- Tests : `npm test` → 109 tests, 109 réussis, 0 échec (après la revue finale et ses correctifs).
 - Pour l'essayer : `npm run serve`, ouvrir http://localhost:4173, puis importer `tests/fixtures/sg-exemple.csv`.
 
 ## Vérifié automatiquement
