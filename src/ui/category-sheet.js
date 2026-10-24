@@ -18,6 +18,7 @@ export function openCategoryPicker(ctx, txId) {
         if (!chip) return;
         const categoryId = chip.dataset.cat;
         close();
+        if (categoryId === tx.categoryId) return;
         const name = state.categories.find((c) => c.id === categoryId)?.name ?? categoryId;
         const question = others > 0
           ? `Ranger aussi les ${others} autres opérations « ${tx.merchant} » dans ${name}, ainsi que les prochaines ?`

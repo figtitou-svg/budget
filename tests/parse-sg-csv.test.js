@@ -76,6 +76,10 @@ test('detectColumns renvoie null sans colonne date', () => {
   assert.deepEqual(detectColumns(['Date', 'Libellé', 'Montant']), { date: 0, labels: [1], amount: 2 });
 });
 
+test('fichier à moins de 3 colonnes → NOT_STATEMENT', () => {
+  assert.throws(() => parseSgCsv('a;b\n1;2\n3;4'),{ code: 'NOT_STATEMENT' });
+});
+
 test('en-tête inconnu → NO_HEADER avec aperçu', () => {
   const text = 'Jour;Opération;Valeur\n12/10/2026;LIDL;-5,00\n13/10/2026;SNCF;-20,00';
   assert.throws(() => parseSgCsv(text), (e) => {

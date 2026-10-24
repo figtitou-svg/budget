@@ -19,6 +19,11 @@ test('15 catégories par défaut bien formées', () => {
 
 const CASES = [
   ['CARTE X1234 12/10 CARREFOUR CITY LYON', -2345, 'courses'],
+  ['CARTE X1234 10/10 KINEPOLIS LOMME', -1100, 'loisirs'],
+  ['VIR RECU DE: AMELIE DUPONT', 2000, 'revenus'],
+  ['CARTE X1234 10/10 DISNEYLAND PARIS', -8900, 'loisirs'],
+  ['PRLV SEPA TOTALENERGIES ELECTRICITE ET GAZ', -4500, 'factures'],
+  ['CARTE X1234 10/10 TOTALENERGIES STATION', -3000, 'transports'],
   ['CARTE X1234 14/10 UBER *EATS PARIS', -1890, 'resto'],
   ['CARTE X1234 15/10 UBER BV PARIS', -1200, 'transports'],
   ['PRLV SEPA FREE MOBILE ECH/101026', -1599, 'factures'],

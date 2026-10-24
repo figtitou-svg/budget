@@ -99,6 +99,7 @@ export function parseSgCsv(text, { mapping } = {}) {
     const h = table.findIndex((cells) => cells.length >= 3 && detectColumns(cells));
     if (h < 0) {
       const preview = table.filter((c) => c.length >= 3 && c.some(Boolean)).slice(0, 8);
+      if (!preview.length) throw new ImportError('NOT_STATEMENT', 'Ce fichier ne ressemble pas à un relevé bancaire (CSV ou OFX).');
       throw new ImportError('NO_HEADER', 'Colonnes du relevé non reconnues.', { sep, preview });
     }
     m = detectColumns(table[h]);

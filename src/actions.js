@@ -21,14 +21,15 @@ export function createActions(ctx) {
     }
   }
 
-  async function importBytes(bytes, { mapping } = {}) {
+  async function importBytes(bytes, { mapping, cols } = {}) {
     const real = state.transactions.filter((t) => !t.demo);
     const demoIds = state.transactions.filter((t) => t.demo).map((t) => t.id);
     const plan = planImport(bytes, { mapping, rules: state.rules, existingIds: new Set(real.map((t) => t.id)) });
     await save(() => ctx.store.putTransactions(plan.added, { removeIds: demoIds }));
     if (mapping) {
-      await save(() => ctx.store.putSetting('columnMapping', mapping));
-      state.settings.columnMapping = mapping;
+      const saved = { ...mapping, cols: cols ?? mapping.cols };
+      await save(() => ctx.store.putSetting('columnMapping', saved));
+      state.settings.columnMapping = saved;
     }
     state.transactions = [...real, ...plan.added];
     state.month = latestMonth();
@@ -50,7 +51,8 @@ export function createActions(ctx) {
     } catch (e) {
       if (!(e instanceof ImportError) || e.code !== 'NO_HEADER') throw e;
       const saved = state.settings.columnMapping;
-      if (saved) {
+      const cols = Math.max(0, ...e.details.preview.map((r) => r.length));
+      if (saved && saved.cols === cols) {
         try { return await importBytes(bytes, { mapping: saved }); } catch (e2) { if (!(e2 instanceof ImportError)) throw e2; }
       }
       state.pendingMapping = { bytes, filename: file.name, preview: e.details.preview, sep: e.details.sep };

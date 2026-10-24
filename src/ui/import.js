@@ -106,7 +106,7 @@ export function renderImport(root, ctx) {
           box.hidden = false;
           return;
         }
-        await ctx.run(() => ctx.actions.importBytes(p.bytes, { mapping }), (r) => `${r.added} opérations ajoutées`);
+        await ctx.run(() => ctx.actions.importBytes(p.bytes, { mapping, cols: Math.max(0, ...p.preview.map((r) => r.length)) }), (r) => `${r.added} opérations ajoutées`);
         break;
       }
       case 'cancel-mapping':
