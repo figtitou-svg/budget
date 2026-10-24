@@ -45,6 +45,8 @@ Non couvert dans ce parcours : renommage de catégorie (« Courses » → « Bou
 ## Bugs trouvés et corrigés pendant la nuit
 
 - `fix: « les classer » ouvre le mois contenant la dernière opération non catégorisée` : le lien du résumé d'import ouvrait le mois courant (Octobre) alors que l'opération non catégorisée était en septembre. Correctif dans `src/ui/import.js` (positionne `state.month`), `CACHE` passé à `budget-v2`. Pas de test Node (logique d'interface). Vérifié dans le navigateur.
+- `fix: précache sans cache HTTP, écriture IndexedDB atomique, sauvegarde validée` : `sw.js` précache avec `cache: 'reload'` (évite un mélange de versions via le cache HTTP de GitHub Pages) ; `#write` annule la transaction si l'écriture lève ; `parseBackup` refuse les catégories sans `id` (tests `backup`, `pwa`).
+- `fix: catégorisation (KINEPOLIS, AMELIE, DISNEYLAND, factures TotalEnergies), mapping de colonnes réutilisé seulement si le nombre de colonnes correspond, NOT_STATEMENT, feuille de catégorie` : règles resserrées, tests ajoutés ; une pression sur la catégorie actuelle ferme simplement la feuille ; `.sheet` défile ; `CACHE` passé à `budget-v3`.
 
 ## Pistes
 
