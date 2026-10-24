@@ -1,0 +1,13 @@
+{
+  "name": "budget",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Où part mon argent — PWA hors-ligne pour relevés Société Générale",
+  "scripts": {
+    "test": "node --test",
+    "serve": "node scripts/serve.mjs",
+    "icons": "node scripts/make-icons.mjs",
+    "fixtures": "node scripts/make-fixtures.mjs"
+  }
+}
