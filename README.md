@@ -28,7 +28,7 @@ npm run icons         # régénère les icônes PNG
 npm run fixtures      # régénère les relevés fictifs de tests/fixtures/
 ```
 
-Après toute modification d'un fichier de l'app, incrémente `CACHE` dans `sw.js` (`budget-v3`, …) pour que les téléphones installés récupèrent la nouvelle version.
+Après toute modification d'un fichier de l'app, incrémente `CACHE` dans `sw.js` (`budget-v4`, …) pour que les téléphones installés récupèrent la nouvelle version.
 
 ## Organisation
 
