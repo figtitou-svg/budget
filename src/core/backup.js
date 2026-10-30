@@ -3,6 +3,8 @@ import { ImportError } from './errors.js';
 export const BACKUP_VERSION = 1;
 
 export function buildBackup({ transactions, rules, categories, settings }, exportedAt = new Date().toISOString()) {
+  // Le jeton du serveur de synchronisation ne doit jamais finir dans un fichier de sauvegarde.
+  const { sync: _sync, ...safeSettings } = settings ?? {};
   return {
     app: 'budget',
     version: BACKUP_VERSION,
@@ -10,7 +12,7 @@ export function buildBackup({ transactions, rules, categories, settings }, expor
     transactions,
     rules: [...rules].map(([merchant, categoryId]) => ({ merchant, categoryId })),
     categories,
-    settings,
+    settings: safeSettings,
   };
 }
 

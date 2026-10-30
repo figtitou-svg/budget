@@ -1,0 +1,23 @@
+# À copier dans /etc/systemd/system/budget-sync.service puis adapter User et chemins.
+[Unit]
+Description=Synchronisation bancaire Budget
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=budget
+WorkingDirectory=/opt/budget/worker
+EnvironmentFile=/opt/budget/worker/.env
+Environment=DATA_FILE=/var/lib/budget-sync/state.json
+ExecStart=/usr/bin/node node-server.mjs
+Restart=on-failure
+RestartSec=5
+StateDirectory=budget-sync
+# Durcissement : le service n'a besoin de rien d'autre que de son dossier de données.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
