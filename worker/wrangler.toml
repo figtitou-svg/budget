@@ -1,0 +1,20 @@
+name = "budget-sync"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+# Créer le KV : npx wrangler kv namespace create BUDGET  → coller l'id ci-dessous.
+[[kv_namespaces]]
+binding = "BUDGET"
+id = "REMPLACER_PAR_L_ID_DU_KV"
+
+[vars]
+# Adresse de l'app (GitHub Pages) : page de retour après le consentement bancaire.
+APP_URL = "https://figtitou-svg.github.io/budget/"
+# Origine autorisée à appeler ce serveur (CORS), sans chemin.
+APP_ORIGIN = "https://figtitou-svg.github.io"
+# Délai minimum entre deux appels à la banque : les banques limitent à ~4 appels/jour/compte.
+MIN_REFRESH_MINUTES = "360"
+# Facultatif : forcer l'identifiant de la banque (sinon recherche de « Société Générale »).
+# INSTITUTION_ID = "SOCIETE_GENERALE_SOGEFRPP"
+
+# Secrets (jamais dans ce fichier) : npx wrangler secret put GC_SECRET_ID / GC_SECRET_KEY / APP_TOKEN

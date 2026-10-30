@@ -1,4 +1,5 @@
 import { planImport } from './core/import.js';
+import { parseSyncResponse, planSync } from './core/sync.js';
 import { applyRule, setManual } from './core/categorize.js';
 import { demoTransactions } from './core/demo.js';
 import { buildBackup, parseBackup } from './core/backup.js';
@@ -24,7 +25,7 @@ export function createActions(ctx) {
   async function importBytes(bytes, { mapping, cols } = {}) {
     const real = state.transactions.filter((t) => !t.demo);
     const demoIds = state.transactions.filter((t) => t.demo).map((t) => t.id);
-    const plan = planImport(bytes, { mapping, rules: state.rules, existingIds: new Set(real.map((t) => t.id)) });
+    const plan = planImport(bytes, { mapping, rules: state.rules, existingIds: new Set(real.map((t) => t.id)), apiEntries: real });
     await save(() => ctx.store.putTransactions(plan.added, { removeIds: demoIds }));
     if (mapping) {
       const saved = { ...mapping, cols: cols ?? mapping.cols };
@@ -76,6 +77,68 @@ export function createActions(ctx) {
     return changed.length;
   }
 
+  const syncConfig = () => {
+    const cfg = state.settings.sync;
+    if (!cfg?.url || !cfg?.token) throw new Error('Renseigne d’abord l’adresse du serveur et le jeton.');
+    return cfg;
+  };
+
+  async function syncFetch(path, init = {}) {
+    const cfg = syncConfig();
+    let res;
+    try {
+      res = await fetch(`${cfg.url}${path}`, { ...init, headers: { authorization: `Bearer ${cfg.token}`, 'content-type': 'application/json' } });
+    } catch (e) {
+      throw new Error('Serveur de synchronisation injoignable.', { cause: e });
+    }
+    if (res.status === 401) throw new Error('Le serveur refuse le jeton : vérifie-le dans la section Synchronisation.');
+    if (!res.ok) throw new Error(`Le serveur de synchronisation a répondu une erreur (${res.status}).`);
+    return res.json();
+  }
+
+  async function saveSyncConfig({ url, token }) {
+    const clean = String(url ?? '').trim().replace(/\/+$/, '');
+    if (!/^https:\/\/[^\s/]+/.test(clean) && !/^http:\/\/localhost(:\d+)?$/.test(clean)) throw new Error('L’adresse doit commencer par https://');
+    if (!String(token ?? '').trim()) throw new Error('Le jeton est obligatoire.');
+    const cfg = { url: clean, token: String(token).trim() };
+    await save(() => ctx.store.putSetting('sync', cfg));
+    state.settings.sync = cfg;
+    state.syncStatus = null;
+  }
+
+  async function clearSyncConfig() {
+    await save(() => ctx.store.putSetting('sync', null));
+    delete state.settings.sync;
+    state.syncStatus = null;
+  }
+
+  // Récupère les nouvelles opérations auprès du serveur (qui limite lui-même ses appels à la banque).
+  async function syncNow() {
+    const data = parseSyncResponse(await syncFetch('/api/transactions'));
+    let added = 0;
+    if (data.status === 'ok') {
+      const real = state.transactions.filter((t) => !t.demo);
+      const demoIds = state.transactions.filter((t) => t.demo).map((t) => t.id);
+      const fresh = planSync(data.rows, { rules: state.rules, existingIds: new Set(real.map((t) => t.id)) });
+      if (fresh.length || demoIds.length) {
+        await save(() => ctx.store.putTransactions(fresh, { removeIds: demoIds }));
+        state.transactions = [...real, ...fresh];
+        state.month = latestMonth();
+        state.openCategory = null;
+      }
+      added = fresh.length;
+    }
+    state.syncStatus = { status: data.status, warning: data.warning, updatedAt: data.updatedAt, nextRefreshAt: data.nextRefreshAt, consentExpiresAt: data.consentExpiresAt, added, checkedAt: Date.now() };
+    return state.syncStatus;
+  }
+
+  // Ouvre la page de consentement de la banque ; on y revient sur l'app, puis syncNow() finalise.
+  async function connectBank() {
+    const { link } = await syncFetch('/api/link', { method: 'POST' });
+    if (typeof link !== 'string' || !/^https:\/\//.test(link)) throw new Error('Le serveur n’a pas renvoyé de lien de connexion.');
+    globalThis.location.assign(link);
+  }
+
   async function loadDemo() {
     if (state.transactions.some((t) => !t.demo)) throw new Error('Tu as déjà des opérations réelles.');
     const txs = demoTransactions(ctx.today(), state.rules);
@@ -110,8 +173,9 @@ export function createActions(ctx) {
 
   async function applyBackup(data) {
     const categories = data.categories.length ? data.categories : DEFAULT_CATEGORIES;
-    await save(() => ctx.store.replaceAll({ ...data, categories }));
-    Object.assign(state, { ...data, categories, openCategory: null, lastSummary: null, pendingMapping: null });
+    const settings = state.settings.sync ? { ...data.settings, sync: state.settings.sync } : data.settings;
+    await save(() => ctx.store.replaceAll({ ...data, settings, categories }));
+    Object.assign(state, { ...data, settings, categories, openCategory: null, lastSummary: null, pendingMapping: null });
     state.month = latestMonth();
   }
 
@@ -133,5 +197,5 @@ export function createActions(ctx) {
     state.categories = state.categories.map((c) => (c.id === id ? updated : c));
   }
 
-  return { importBytes, importFile, recategorize, loadDemo, removeDemo, downloadBackup, readBackup, applyBackup, clearAll, saveCategory };
+  return { importBytes, importFile, syncNow, connectBank, saveSyncConfig, clearSyncConfig, recategorize, loadDemo, removeDemo, downloadBackup, readBackup, applyBackup, clearAll, saveCategory };
 }

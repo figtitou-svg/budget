@@ -36,6 +36,7 @@ const ctx = {
       else a.removeAttribute('aria-current');
     });
     root.onclick = null;
+    root.onsubmit = null;
     root.onchange = null;
     VIEWS[tab](root, ctx);
   },
@@ -66,6 +67,21 @@ const ctx = {
 ctx.actions = createActions(ctx);
 globalThis.__budget = ctx; // inspection depuis la console
 
+// Synchronisation discrète au lancement et au retour sur l'app (le serveur limite les appels à la banque).
+let lastAuto = 0;
+async function autoSync() {
+  if (!state.settings.sync || Date.now() - lastAuto < 5 * 60_000) return;
+  lastAuto = Date.now();
+  try {
+    const r = await ctx.actions.syncNow();
+    if (r.added) ctx.toast(`${r.added} nouvelles opérations`);
+    ctx.render();
+  } catch (e) {
+    console.error(e);
+  }
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') autoSync(); });
+
 async function init() {
   try {
     ctx.store = await openStore();
@@ -82,6 +98,7 @@ async function init() {
   state.month = listMonths(state.transactions)[0] ?? state.month;
   window.addEventListener('hashchange', () => { window.scrollTo(0, 0); ctx.render(); });
   ctx.render();
+  autoSync();
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch((e) => console.error('Service worker', e));
   }

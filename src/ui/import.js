@@ -29,6 +29,43 @@ function summaryHtml(s) {
   </ul></section>`;
 }
 
+const when = (ms) => new Date(ms).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
+
+function syncHtml(state) {
+  const cfg = state.settings.sync;
+  if (!cfg) {
+    return `<h2>Synchronisation bancaire</h2>
+      <p class="muted small">Récupère tes opérations automatiquement via ton serveur de synchronisation (voir <code>worker/README.md</code>).</p>
+      <form class="stack" data-form="sync-config">
+        <label class="field">Adresse du serveur<input name="url" type="url" inputmode="url" placeholder="https://budget-sync.xxx.workers.dev" autocomplete="off" required></label>
+        <label class="field">Jeton<input name="token" type="password" autocomplete="off" required></label>
+        <button type="submit" class="btn primary">Enregistrer</button>
+      </form>`;
+  }
+  const s = state.syncStatus;
+  const lines = [];
+  if (!s) lines.push('Pas encore synchronisé depuis l’ouverture de l’app.');
+  else if (s.status === 'not_linked') lines.push('Aucune banque connectée.');
+  else if (s.status === 'pending') lines.push('Connexion à la banque en cours : termine le consentement chez ta banque, puis reviens et synchronise.');
+  else if (s.status === 'expired') lines.push('Le consentement bancaire a expiré : reconnecte ta banque.');
+  else {
+    lines.push(s.added ? `${s.added} nouvelles opérations.` : 'Rien de nouveau.');
+    if (s.updatedAt) lines.push(`Dernière lecture de la banque : ${when(s.updatedAt)}.`);
+    if (s.nextRefreshAt > Date.now()) lines.push(`Prochaine lecture possible : ${when(s.nextRefreshAt)} (les banques limitent les appels).`);
+    if (s.warning === 'rate_limited') lines.push('La banque limite les appels : réessaie plus tard.');
+    else if (s.warning) lines.push('La banque ne répond pas pour le moment.');
+    if (s.consentExpiresAt && s.consentExpiresAt - Date.now() < 7 * 86_400_000) lines.push(`Le consentement expire le ${when(s.consentExpiresAt)} : pense à reconnecter ta banque.`);
+  }
+  const needsLink = !s || s.status !== 'ok';
+  return `<h2>Synchronisation bancaire</h2>
+    <p class="muted small" role="status">${lines.map(escapeHtml).join('<br>')}</p>
+    <div class="stack">
+      <button type="button" class="btn primary" data-action="sync-now">Synchroniser maintenant</button>
+      <button type="button" class="btn" data-action="connect-bank">${needsLink ? 'Connecter ma banque' : 'Reconnecter ma banque'}</button>
+      <button type="button" class="btn ghost" data-action="sync-forget">Oublier ce serveur</button>
+    </div>`;
+}
+
 export function renderImport(root, ctx) {
   const { state } = ctx;
   const hasReal = state.transactions.some((t) => !t.demo);
@@ -42,6 +79,7 @@ export function renderImport(root, ctx) {
       </label>
       <p class="muted small">CSV ou OFX exporté depuis Société Générale. Rien ne quitte ton appareil.</p>`}
     ${summaryHtml(state.lastSummary)}
+    ${syncHtml(state)}
     <details class="help"><summary>Comment exporter mon relevé SG ?</summary><ol>
       <li>Connecte-toi sur <strong>particuliers.sg.fr</strong> depuis un navigateur et ouvre ton compte courant.</li>
       <li>Cherche « Télécharger » ou « Exporter mes opérations », choisis le format <strong>CSV</strong> (ou OFX / Money).</li>
@@ -65,6 +103,13 @@ export function renderImport(root, ctx) {
       <button type="button" class="btn danger" data-action="clear"${hasAny ? '' : ' disabled'}>Tout effacer</button>
     </div>
     <p class="muted small">Tes données restent dans ce navigateur, sur cet appareil${hasReal ? '. Pense à exporter une sauvegarde de temps en temps' : ''}.</p>`;
+
+  root.onsubmit = async (e) => {
+    e.preventDefault();
+    if (e.target.dataset.form !== 'sync-config') return;
+    const f = e.target.elements;
+    await ctx.run(() => ctx.actions.saveSyncConfig({ url: f.url.value, token: f.token.value }), 'Serveur enregistré');
+  };
 
   root.onchange = async (e) => {
     const el = e.target;
@@ -112,6 +157,17 @@ export function renderImport(root, ctx) {
       case 'cancel-mapping':
         state.pendingMapping = null;
         ctx.render();
+        break;
+      case 'sync-now':
+        await ctx.run(() => ctx.actions.syncNow(), (r) => (r.status === 'ok' ? (r.added ? `${r.added} opérations ajoutées` : 'Rien de nouveau') : null));
+        break;
+      case 'connect-bank':
+        await ctx.run(() => ctx.actions.connectBank(), null);
+        break;
+      case 'sync-forget':
+        if (await ctx.sheet.confirm('Oublier l’adresse et le jeton du serveur sur cet appareil ? Tes opérations restent.', 'Oublier', 'Annuler')) {
+          await ctx.run(() => ctx.actions.clearSyncConfig(), 'Serveur oublié');
+        }
         break;
       case 'export':
         await ctx.run(() => ctx.actions.downloadBackup(), 'Sauvegarde exportée');

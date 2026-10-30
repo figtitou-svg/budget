@@ -1,6 +1,6 @@
 # Budget — où part mon argent
 
-Petite app web installable sur téléphone : tu importes ton relevé **Société Générale** (CSV ou OFX), elle range chaque opération dans une catégorie et te montre la répartition du mois et l'évolution mois par mois. Tout reste sur ton appareil : pas de compte, pas de serveur.
+Petite app web installable sur téléphone : tu importes ton relevé **Société Générale** (CSV ou OFX), elle range chaque opération dans une catégorie et te montre la répartition du mois et l'évolution mois par mois. Par défaut, tout reste sur ton appareil : pas de compte, pas de serveur (la synchronisation bancaire, facultative, ajoute un petit serveur à toi).
 
 ## Utiliser l'app
 
@@ -35,6 +35,7 @@ Après toute modification d'un fichier de l'app, incrémente `CACHE` dans `sw.js
 - `src/core/` : logique pure (lecture CSV/OFX, normalisation, catégorisation, doublons, stats, sauvegarde, démo), testée sous Node.
 - `src/ui/`, `src/app.js`, `src/actions.js` : interface et actions navigateur.
 - `src/store.js` : stockage IndexedDB.
+- `worker/` : serveur de synchronisation bancaire (Cloudflare Worker + GoCardless), déployé séparément.
 - Brancher une nouvelle source (ex. connecteur bancaire) : produire des lignes `{ date, amountCents, rawLabel }` et les passer à `toTransactions()` de `src/core/import.js`.
 
 ## Captures
