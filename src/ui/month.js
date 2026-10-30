@@ -7,7 +7,7 @@ function renderEmpty(root, ctx) {
   root.innerHTML = `<section class="empty">
     <div class="empty-icon" aria-hidden="true">📊</div>
     <h1>Où part ton argent ?</h1>
-    <p class="muted">Importe ton relevé Société Générale (CSV ou OFX) pour voir tes dépenses par catégorie, mois par mois.</p>
+    <p class="muted">Importe ton relevé Société Générale (CSV ou OFX), ou note tes dépenses au fil de l’eau avec le bouton +, pour voir tes dépenses par catégorie, mois par mois.</p>
     <a class="btn primary" href="#import">Importer un relevé</a>
     <button type="button" class="btn" data-action="demo">Essayer avec des données de démo</button>
   </section>`;
@@ -27,7 +27,7 @@ export function renderMonth(root, ctx) {
 
   const txList = (list) => `<ul class="tx-list">${list.map((t) => `<li><button type="button" class="tx" data-action="tx" data-id="${escapeHtml(t.id)}">`
     + `<span class="tx-date">${formatDay(t.date)}</span>`
-    + `<span class="tx-merchant">${escapeHtml(t.merchant)}${t.categorySource === 'manual' ? ' ✎' : ''}</span>`
+    + `<span class="tx-merchant">${escapeHtml(t.merchant)}${t.categorySource === 'manual' ? ' ✎' : ''}${t.manualEntry ? ' <span class="badge">saisie</span>' : ''}</span>`
     + `<span class="tx-amount${t.amountCents > 0 ? ' pos' : ''}">${formatEuros(t.amountCents, { signed: true })}</span></button></li>`).join('')}</ul>`;
 
   const row = (g, sign) => {

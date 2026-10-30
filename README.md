@@ -7,9 +7,10 @@ Petite app web installable sur téléphone : tu importes ton relevé **Société
 1. **Exporter le relevé SG** : sur particuliers.sg.fr (navigateur), compte courant → « Télécharger » / « Exporter mes opérations » → format **CSV** (ou OFX/Money) → choisir la période.
 2. **Importer** : onglet *Import* → « Importer un relevé » → choisir le fichier. Les périodes qui se chevauchent ne créent pas de doublons.
 3. **Corriger une catégorie** : onglet *Mois* → toucher une catégorie → toucher une opération → choisir la catégorie. « Oui, toutes » crée une règle pour ce commerçant (passé et futur).
-4. **Évolution** : barres sur 6 ou 12 mois, filtre par catégorie, moyenne et écart du dernier mois.
-5. **iPhone** : installe d'abord l'app sur l'écran d'accueil (Partager → « Sur l'écran d'accueil »), puis importe le relevé depuis l'app installée : le stockage de Safari et celui de l'app installée sont séparés.
-6. **Sauvegarde** : onglet *Import* → « Exporter une sauvegarde (JSON) ». À refaire de temps en temps : les données vivent dans le navigateur, et le vider les efface.
+4. **Saisie au fil de l'eau** : onglet *Mois* → bouton **+** → montant, commerçant, date (catégorie automatique ou au choix). L'opération apparaît tout de suite avec le badge « saisie ». À l'import du relevé suivant, elle est rapprochée de la ligne bancaire de même montant (±3 jours) et remplacée par elle, en gardant la catégorie que tu avais choisie. Une saisie se supprime en la touchant dans la liste.
+5. **Évolution** : barres sur 6 ou 12 mois, filtre par catégorie, moyenne et écart du dernier mois.
+6. **iPhone** : installe d'abord l'app sur l'écran d'accueil (Partager → « Sur l'écran d'accueil »), puis importe le relevé depuis l'app installée : le stockage de Safari et celui de l'app installée sont séparés.
+7. **Sauvegarde** : onglet *Import* → « Exporter une sauvegarde (JSON) ». À refaire de temps en temps : les données vivent dans le navigateur, et le vider les efface.
 
 ## Mettre l'app sur ton téléphone (GitHub Pages, ~2 min)
 

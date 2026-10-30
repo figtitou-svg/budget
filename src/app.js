@@ -6,6 +6,7 @@ import { createSheets } from './ui/sheet.js';
 import { renderMonth } from './ui/month.js';
 import { renderTrends } from './ui/trends.js';
 import { renderImport } from './ui/import.js';
+import { openAddExpense } from './ui/add-expense.js';
 
 const VIEWS = { mois: renderMonth, evolution: renderTrends, import: renderImport };
 
@@ -35,6 +36,7 @@ const ctx = {
       if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
     });
+    document.getElementById('fab').hidden = tab !== 'mois';
     root.onclick = null;
     root.onchange = null;
     VIEWS[tab](root, ctx);
@@ -86,5 +88,7 @@ async function init() {
     navigator.serviceWorker.register('./sw.js').catch((e) => console.error('Service worker', e));
   }
 }
+
+document.getElementById('fab').addEventListener('click', () => openAddExpense(ctx));
 
 init();

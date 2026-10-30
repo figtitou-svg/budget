@@ -5,6 +5,7 @@ import { normalizeMerchant } from './normalize.js';
 import { categorize, FALLBACK_CATEGORY } from './categorize.js';
 import { assignIds, splitNew } from './dedupe.js';
 import { ImportError } from './errors.js';
+import { reconcile } from './manual.js';
 
 export function parseStatement(bytes, { mapping } = {}) {
   const text = decodeBytes(bytes);
@@ -23,11 +24,14 @@ export function toTransactions(rows, rules, importedAt) {
   });
 }
 
-export function planImport(bytes, { mapping, rules = new Map(), existingIds = new Set(), importedAt = new Date().toISOString() } = {}) {
+export function planImport(bytes, { mapping, rules = new Map(), existingIds = new Set(), manualEntries = [], importedAt = new Date().toISOString() } = {}) {
   const { rows, skipped } = parseStatement(bytes, { mapping });
-  const { added, duplicates } = splitNew(toTransactions(rows, rules, importedAt), existingIds);
+  const split = splitNew(toTransactions(rows, rules, importedAt), existingIds);
+  const { added, removedIds } = reconcile(manualEntries, split.added);
+  const { duplicates } = split;
   return {
     added,
+    reconciledIds: removedIds,
     duplicateCount: duplicates.length,
     skipped,
     uncategorizedCount: added.filter((t) => t.categoryId === FALLBACK_CATEGORY).length,

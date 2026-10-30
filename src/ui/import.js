@@ -23,6 +23,7 @@ function summaryHtml(s) {
   return `<section class="summary" role="status"><h2>Dernier import</h2><ul>
     <li><strong>${s.added}</strong> opérations ajoutées</li>
     <li><strong>${s.duplicates}</strong> doublons ignorés</li>
+    ${s.reconciled ? `<li><strong>${s.reconciled}</strong> saisies rapprochées du relevé</li>` : ''}
     ${s.skipped ? `<li><strong>${s.skipped}</strong> lignes ignorées (en-têtes, soldes…)</li>` : ''}
     ${s.removedDemo ? '<li>Données de démo retirées</li>' : ''}
     ${s.uncategorized ? `<li><strong>${s.uncategorized}</strong> non catégorisées → <a href="#mois" data-action="see-uncat">les classer</a></li>` : ''}

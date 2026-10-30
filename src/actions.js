@@ -1,4 +1,5 @@
 import { planImport } from './core/import.js';
+import { buildManualTransaction } from './core/manual.js';
 import { applyRule, setManual } from './core/categorize.js';
 import { demoTransactions } from './core/demo.js';
 import { buildBackup, parseBackup } from './core/backup.js';
@@ -24,20 +25,23 @@ export function createActions(ctx) {
   async function importBytes(bytes, { mapping, cols } = {}) {
     const real = state.transactions.filter((t) => !t.demo);
     const demoIds = state.transactions.filter((t) => t.demo).map((t) => t.id);
-    const plan = planImport(bytes, { mapping, rules: state.rules, existingIds: new Set(real.map((t) => t.id)) });
-    await save(() => ctx.store.putTransactions(plan.added, { removeIds: demoIds }));
+    const plan = planImport(bytes, {
+      mapping, rules: state.rules, existingIds: new Set(real.map((t) => t.id)), manualEntries: real.filter((t) => t.manualEntry),
+    });
+    const gone = new Set(plan.reconciledIds);
+    await save(() => ctx.store.putTransactions(plan.added, { removeIds: [...demoIds, ...gone] }));
     if (mapping) {
       const saved = { ...mapping, cols: cols ?? mapping.cols };
       await save(() => ctx.store.putSetting('columnMapping', saved));
       state.settings.columnMapping = saved;
     }
-    state.transactions = [...real, ...plan.added];
+    state.transactions = [...real.filter((t) => !gone.has(t.id)), ...plan.added];
     state.month = latestMonth();
     state.openCategory = null;
     state.pendingMapping = null;
     state.lastSummary = {
       added: plan.added.length, duplicates: plan.duplicateCount, skipped: plan.skipped,
-      uncategorized: plan.uncategorizedCount, removedDemo: demoIds.length,
+      uncategorized: plan.uncategorizedCount, removedDemo: demoIds.length, reconciled: gone.size,
     };
     globalThis.navigator?.storage?.persist?.().catch(() => {});
     return state.lastSummary;
@@ -74,6 +78,25 @@ export function createActions(ctx) {
     if (all) state.rules.set(tx.merchant, categoryId);
     state.transactions = next;
     return changed.length;
+  }
+
+  async function addManual(entry) {
+    const tx = buildManualTransaction(entry, state.rules);
+    const demoIds = state.transactions.filter((t) => t.demo).map((t) => t.id);
+    await save(() => ctx.store.putTransactions([tx], { removeIds: demoIds }));
+    state.transactions = [...state.transactions.filter((t) => !t.demo), tx];
+    state.month = tx.date.slice(0, 7);
+    state.openCategory = null;
+    return tx;
+  }
+
+  async function deleteManual(txId) {
+    const tx = state.transactions.find((t) => t.id === txId);
+    if (!tx?.manualEntry) return;
+    await save(() => ctx.store.deleteTransactions([txId]));
+    state.transactions = state.transactions.filter((t) => t.id !== txId);
+    state.month = latestMonth();
+    state.openCategory = null;
   }
 
   async function loadDemo() {
@@ -133,5 +156,5 @@ export function createActions(ctx) {
     state.categories = state.categories.map((c) => (c.id === id ? updated : c));
   }
 
-  return { importBytes, importFile, recategorize, loadDemo, removeDemo, downloadBackup, readBackup, applyBackup, clearAll, saveCategory };
+  return { importBytes, importFile, addManual, deleteManual, recategorize, loadDemo, removeDemo, downloadBackup, readBackup, applyBackup, clearAll, saveCategory };
 }
