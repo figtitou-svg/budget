@@ -8,8 +8,9 @@ Petite app web installable sur téléphone : tu importes ton relevé **Société
 2. **Importer** : onglet *Import* → « Importer un relevé » → choisir le fichier. Les périodes qui se chevauchent ne créent pas de doublons.
 3. **Corriger une catégorie** : onglet *Mois* → toucher une catégorie → toucher une opération → choisir la catégorie. « Oui, toutes » crée une règle pour ce commerçant (passé et futur).
 4. **Évolution** : barres sur 6 ou 12 mois, filtre par catégorie, moyenne et écart du dernier mois.
-5. **iPhone** : installe d'abord l'app sur l'écran d'accueil (Partager → « Sur l'écran d'accueil »), puis importe le relevé depuis l'app installée : le stockage de Safari et celui de l'app installée sont séparés.
-6. **Sauvegarde** : onglet *Import* → « Exporter une sauvegarde (JSON) ». À refaire de temps en temps : les données vivent dans le navigateur, et le vider les efface.
+5. **Synchronisation bancaire (facultatif)** : onglet *Import* → *Synchronisation bancaire*. L'app récupère alors tes opérations toute seule via un petit serveur Cloudflare relié à GoCardless (une lecture de la banque toutes les 6 h au plus). Installation pas à pas dans [`worker/README.md`](worker/README.md). Le CSV/OFX reste possible : les opérations déjà synchronisées ne sont pas comptées deux fois.
+6. **iPhone** : installe d'abord l'app sur l'écran d'accueil (Partager → « Sur l'écran d'accueil »), puis importe le relevé depuis l'app installée : le stockage de Safari et celui de l'app installée sont séparés.
+7. **Sauvegarde** : onglet *Import* → « Exporter une sauvegarde (JSON) ». À refaire de temps en temps : les données vivent dans le navigateur, et le vider les efface.
 
 ## Mettre l'app sur ton téléphone (GitHub Pages, ~2 min)
 
