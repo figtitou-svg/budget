@@ -1,0 +1,5 @@
+# Remplacer par ton nom de domaine (il doit pointer vers l'IP publique de la VM).
+# Caddy obtient et renouvelle le certificat HTTPS tout seul.
+sync.exemple.fr {
+	reverse_proxy 127.0.0.1:8787
+}

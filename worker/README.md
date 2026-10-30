@@ -1,6 +1,8 @@
 # Serveur de synchronisation bancaire
 
-Petit Cloudflare Worker qui lit ton compte Société Générale via **GoCardless Bank Account Data** (Open Banking / PSD2) et le met à disposition de l'app. Il existe parce que la clé GoCardless ne doit jamais se trouver dans une page web : elle reste ici, dans les secrets du Worker.
+> Deux façons de l'héberger : **Cloudflare Worker** (section « Installation ») ou **ta propre VM** (section « Variante »).
+
+Petit serveur (Cloudflare Worker, ou Node sur ta propre VM) qui lit ton compte Société Générale via **GoCardless Bank Account Data** (Open Banking / PSD2) et le met à disposition de l'app. Il existe parce que la clé GoCardless ne doit jamais se trouver dans une page web : elle reste ici, dans les secrets du Worker.
 
 ```
 App (téléphone) ──jeton──▶ Worker Cloudflare ──clé GoCardless──▶ GoCardless ──▶ Société Générale
@@ -39,6 +41,38 @@ Prérequis : un compte [Cloudflare](https://dash.cloudflare.com) (gratuit) et No
    ```
    Wrangler affiche l'adresse du Worker (`https://budget-sync.<ton-compte>.workers.dev`).
 6. **Dans l'app** : onglet *Import* → *Synchronisation bancaire* → colle l'adresse et le jeton → *Enregistrer* → *Connecter ma banque*. Tu es envoyé chez Société Générale pour donner ton accord, puis tu reviens sur l'app : elle synchronise toute seule.
+
+## Variante : héberger sur ta propre VM (Oracle Cloud, etc.)
+
+Le même code tourne avec Node, sans Cloudflare ni aucune dépendance : `node-server.mjs` sert les mêmes routes et garde ses données dans un fichier JSON. Les données bancaires restent alors chez toi.
+
+Prérequis : une VM Linux avec **Node 18+**, un **nom de domaine** qui pointe vers son IP publique, et les ports **80 et 443** ouverts (dans la *Security List* / le *Network Security Group* Oracle **et** dans le pare-feu de la VM, par ex. `sudo iptables`/`ufw`). Le HTTPS est obligatoire : l'app est en `https://` et le navigateur refuse d'appeler un serveur en `http://`.
+
+1. **Copier le code** sur la VM :
+   ```bash
+   sudo useradd --system --home /opt/budget budget
+   sudo git clone https://github.com/figtitou-svg/budget.git /opt/budget
+   ```
+2. **Configurer les secrets** :
+   ```bash
+   cd /opt/budget/worker
+   sudo cp .env.example .env
+   sudo nano .env            # GC_SECRET_ID, GC_SECRET_KEY, APP_TOKEN, APP_URL, APP_ORIGIN
+   sudo chmod 600 .env       # lisible par root seulement : systemd le lit avant de lâcher les droits
+   ```
+3. **Lancer en service** (redémarre tout seul en cas de panne ou de reboot) :
+   ```bash
+   sudo cp deploy/budget-sync.service /etc/systemd/system/
+   sudo systemctl daemon-reload
+   sudo systemctl enable --now budget-sync
+   sudo systemctl status budget-sync      # doit afficher « active (running) »
+   ```
+   Si `node` n'est pas dans `/usr/bin/node`, corrige `ExecStart` (`which node`).
+4. **HTTPS avec Caddy** ([installation](https://caddyserver.com/docs/install)) : mets le contenu de `deploy/Caddyfile.example` dans `/etc/caddy/Caddyfile` avec ton domaine, puis `sudo systemctl reload caddy`. Le certificat est obtenu et renouvelé automatiquement.
+5. **Tester** : `curl -H "authorization: Bearer <ton jeton>" https://sync.exemple.fr/api/status` doit répondre `{"status":"not_linked",...}`.
+6. **Dans l'app** : même chose que plus haut, avec `https://sync.exemple.fr` comme adresse.
+
+Le serveur n'écoute que sur `127.0.0.1` (seul Caddy peut l'atteindre). Les requêtes sont traitées une par une, pour que deux appels simultanés ne consomment pas deux fois le quota de la banque. Sauvegarde utile : `/var/lib/budget-sync/state.json` (cache des opérations et lien avec la banque ; le perdre oblige à reconnecter la banque). Mise à jour : `sudo git -C /opt/budget pull && sudo systemctl restart budget-sync`. Logs : `journalctl -u budget-sync -f`.
 
 ## Utilisation
 
