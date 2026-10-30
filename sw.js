@@ -1,13 +1,13 @@
-const CACHE = 'budget-v5';
+const CACHE = 'budget-v4';
 const ASSETS = [
   './', './index.html', './styles.css', './manifest.webmanifest',
   './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png',
   './src/app.js', './src/actions.js', './src/store.js',
   './src/core/errors.js', './src/core/decode.js', './src/core/parse-sg-csv.js', './src/core/parse-ofx.js',
   './src/core/normalize.js', './src/core/categories.js', './src/core/categorize.js', './src/core/dedupe.js',
-  './src/core/mapping.js', './src/core/import.js', './src/core/stats.js', './src/core/backup.js', './src/core/demo.js', './src/core/manual.js',
+  './src/core/mapping.js', './src/core/import.js', './src/core/stats.js', './src/core/backup.js', './src/core/demo.js',
   './src/ui/format.js', './src/ui/charts.js', './src/ui/sheet.js', './src/ui/month.js', './src/ui/category-sheet.js',
-  './src/ui/trends.js', './src/ui/import.js', './src/ui/add-expense.js',
+  './src/ui/trends.js', './src/ui/import.js',
 ];
 
 self.addEventListener('install', (event) => {

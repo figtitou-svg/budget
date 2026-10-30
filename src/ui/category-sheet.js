@@ -11,15 +11,9 @@ export function openCategoryPicker(ctx, txId) {
     `<h2>${escapeHtml(tx.merchant)}</h2>`
     + `<p class="muted">${formatDay(tx.date)} · ${formatEuros(tx.amountCents, { signed: true })}</p>`
     + `<p class="raw">${escapeHtml(tx.rawLabel)}</p>`
-    + `<div class="cat-grid">${chips}</div>`
-    + (tx.manualEntry ? '<button type="button" class="btn danger" data-delete>Supprimer cette saisie</button>' : ''),
+    + `<div class="cat-grid">${chips}</div>`,
     (body, close) => {
       body.addEventListener('click', async (e) => {
-        if (e.target.closest('[data-delete]')) {
-          close();
-          if (await ctx.sheet.confirm(`Supprimer la saisie « ${tx.merchant} » ?`, 'Supprimer', 'Garder')) ctx.run(() => ctx.actions.deleteManual(tx.id), 'Saisie supprimée');
-          return;
-        }
         const chip = e.target.closest('[data-cat]');
         if (!chip) return;
         const categoryId = chip.dataset.cat;
