@@ -70,7 +70,7 @@ globalThis.__budget = ctx; // inspection depuis la console
 // Synchronisation discrète au lancement et au retour sur l'app (le serveur limite les appels à la banque).
 let lastAuto = 0;
 async function autoSync() {
-  if (!state.settings.sync || Date.now() - lastAuto < 5 * 60_000) return;
+  if (!state.settings.sync || state.pendingLink || Date.now() - lastAuto < 5 * 60_000) return;
   lastAuto = Date.now();
   try {
     const r = await ctx.actions.syncNow();
@@ -80,6 +80,23 @@ async function autoSync() {
     console.error(e);
   }
 }
+// Au retour de la banque, l'adresse de l'app contient ?code=…&state=… : on les met de côté et on nettoie l'adresse.
+function captureBankReturn() {
+  const q = new URLSearchParams(location.search);
+  if (!q.get('code') || !q.get('state')) return;
+  state.pendingLink = { code: q.get('code'), state: q.get('state') };
+  history.replaceState(null, '', `${location.pathname}${location.hash}`);
+}
+
+async function finishBankLink() {
+  if (!state.settings.sync) {
+    location.hash = '#import';
+    ctx.toast('Renseigne le serveur de synchronisation pour terminer la connexion à ta banque.');
+    return;
+  }
+  await ctx.run(() => ctx.actions.completeLink(), (r) => (r?.status === 'ok' ? 'Banque connectée' : null));
+}
+
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') autoSync(); });
 
 async function init() {
@@ -97,8 +114,10 @@ async function init() {
   }
   state.month = listMonths(state.transactions)[0] ?? state.month;
   window.addEventListener('hashchange', () => { window.scrollTo(0, 0); ctx.render(); });
+  captureBankReturn();
   ctx.render();
-  autoSync();
+  if (state.pendingLink) finishBankLink();
+  else autoSync();
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch((e) => console.error('Service worker', e));
   }

@@ -35,41 +35,53 @@ test('file-kv : fichier corrompu → erreur explicite, pas d’écrasement silen
   assert.equal(readFileSync(path, 'utf8'), '{pas du json');
 });
 
-test('envFromProcess refuse de démarrer sans secrets', () => {
-  assert.throws(() => envFromProcess({ APP_URL: 'x' }), /GC_SECRET_ID.*GC_SECRET_KEY.*APP_TOKEN/);
-  const env = envFromProcess({ GC_SECRET_ID: 'i', GC_SECRET_KEY: 'k', APP_TOKEN: 't', APP_URL: 'https://a/', APP_ORIGIN: 'https://a', DATA_FILE: join(tmp(), 's.json') });
+const pair = await crypto.subtle.generateKey({ name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, true, ['sign', 'verify']);
+const PEM = `-----BEGIN PRIVATE KEY-----\n${Buffer.from(await crypto.subtle.exportKey('pkcs8', pair.privateKey)).toString('base64').match(/.{1,64}/g).join('\n')}\n-----END PRIVATE KEY-----\n`;
+const baseEnv = (dir) => {
+  const keyFile = join(dir, 'k.pem');
+  writeFileSync(keyFile, PEM, { mode: 0o600 });
+  return { EB_APP_ID: 'app', EB_PRIVATE_KEY_FILE: keyFile, APP_TOKEN: 'secret', APP_URL: 'https://app/', APP_ORIGIN: 'https://app', DATA_FILE: join(dir, 's.json') };
+};
+
+test('envFromProcess refuse de démarrer sans configuration, lit la clé depuis un fichier', () => {
+  assert.throws(() => envFromProcess({ APP_URL: 'x' }), /EB_APP_ID.*APP_TOKEN.*EB_PRIVATE_KEY_FILE/);
+  const env = envFromProcess(baseEnv(tmp()));
   assert.equal(env.MIN_REFRESH_MINUTES, '360');
+  assert.match(env.EB_PRIVATE_KEY, /BEGIN PRIVATE KEY/);
+  assert.throws(() => envFromProcess({ ...baseEnv(tmp()), EB_PRIVATE_KEY_FILE: '/inexistant/k.pem' }), /ENOENT/);
 });
 
-test('serveur HTTP : auth, CORS et une seule lecture banque pour deux requêtes simultanées', async () => {
+test('serveur HTTP : auth, CORS, corps POST transmis, et une seule lecture banque pour deux requêtes simultanées', async () => {
   const bank = [];
-  const fetchFn = async (url) => {
-    const path = url.replace('https://bankaccountdata.gocardless.com/api/v2', '');
-    bank.push(path);
+  const fetchFn = async (url, init) => {
+    const u = new URL(url);
+    bank.push(`${init.method} ${u.pathname}`);
     const r = (b, s = 200) => new Response(JSON.stringify(b), { status: s });
-    if (path.startsWith('/token/')) return r({ access: 'A', access_expires: 86400 });
-    if (path.startsWith('/institutions/')) return r([{ id: 'SOCIETE_GENERALE_SOGEFRPP', name: 'Société Générale' }]);
-    if (path === '/requisitions/') return r({ id: 'REQ', link: 'https://bank.example/c', status: 'CR' }, 201);
-    if (path.startsWith('/requisitions/REQ')) return r({ status: 'LN', accounts: ['ACC'] });
-    if (path.startsWith('/accounts/ACC/')) {
+    if (u.pathname === '/aspsps') return r({ aspsps: [{ name: 'Société Générale', country: 'FR', psu_types: ['personal'], maximum_consent_validity: 15552000 }] });
+    if (u.pathname === '/auth') return r({ url: 'https://bank.example/c', authorization_id: 'A' });
+    if (u.pathname === '/sessions') return r({ session_id: 'S', accounts: [{ uid: 'U1', identification_hash: 'P.AAAAAAAAAAAAAAAA' }], access: { valid_until: new Date(Date.now() + 86_400_000 * 100).toISOString() } });
+    if (u.pathname === '/accounts/U1/transactions') {
       await new Promise((ok) => setTimeout(ok, 30)); // laisse la 2e requête arriver pendant la lecture
-      return r({ transactions: { booked: [{ transactionId: 'T1', bookingDate: '2026-10-12', transactionAmount: { amount: '-5.00', currency: 'EUR' }, remittanceInformationUnstructured: 'X' }] } });
+      return r({ transactions: [{ status: 'BOOK', booking_date: '2026-10-12', entry_reference: 'T1', credit_debit_indicator: 'DBIT', transaction_amount: { amount: '5.00', currency: 'EUR' }, remittance_information: ['X'] }] });
     }
     return r({}, 404);
   };
-  const env = envFromProcess({ GC_SECRET_ID: 'i', GC_SECRET_KEY: 'k', APP_TOKEN: 'secret', APP_URL: 'https://app/', APP_ORIGIN: 'https://app', DATA_FILE: join(tmp(), 's.json') });
+  const env = envFromProcess(baseEnv(tmp()));
   const server = createApp(env, { fetchFn });
   await new Promise((ok) => server.listen(0, '127.0.0.1', ok));
   const base = `http://127.0.0.1:${server.address().port}`;
-  const get = (path, token = 'secret', method = 'GET') => fetch(base + path, { method, headers: token ? { authorization: `Bearer ${token}` } : {} });
+  const req = (path, { token = 'secret', method = 'GET', body } = {}) => fetch(base + path, { method, headers: { ...(token ? { authorization: `Bearer ${token}` } : {}), ...(body ? { 'content-type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined });
   try {
-    assert.equal((await get('/api/status', '')).status, 401);
-    assert.equal((await get('/api/status', 'wrong')).status, 401);
+    assert.equal((await req('/api/status', { token: '' })).status, 401);
+    assert.equal((await req('/api/status', { token: 'wrong' })).status, 401);
     const pre = await fetch(`${base}/api/transactions`, { method: 'OPTIONS' });
     assert.equal(pre.status, 204);
     assert.equal(pre.headers.get('access-control-allow-origin'), 'https://app');
-    assert.equal((await (await get('/api/link', 'secret', 'POST')).json()).link, 'https://bank.example/c');
-    const [a, b] = await Promise.all([get('/api/transactions'), get('/api/transactions')]);
+    assert.equal((await (await req('/api/link', { method: 'POST' })).json()).link, 'https://bank.example/c');
+    const state = (await env.BUDGET.get('state')).pending.state;
+    const linked = await (await req('/api/session', { method: 'POST', body: { code: 'GOOD', state } })).json(); // corps POST bien transmis
+    assert.equal(linked.status, 'ok');
+    const [a, b] = await Promise.all([req('/api/transactions'), req('/api/transactions')]);
     assert.equal((await a.json()).rows.length, 1);
     assert.equal((await b.json()).rows.length, 1);
     assert.equal(bank.filter((p) => p.includes('/accounts/')).length, 1);
