@@ -92,6 +92,7 @@ export function createActions(ctx) {
       throw new Error('Serveur de synchronisation injoignable.', { cause: e });
     }
     if (res.status === 401) throw new Error('Le serveur refuse le jeton : vérifie-le dans la section Synchronisation.');
+    if (res.status === 400) throw new Error('La connexion à la banque a échoué ou a expiré : recommence « Connecter ma banque ».');
     if (!res.ok) throw new Error(`Le serveur de synchronisation a répondu une erreur (${res.status}).`);
     return res.json();
   }
@@ -104,6 +105,7 @@ export function createActions(ctx) {
     await save(() => ctx.store.putSetting('sync', cfg));
     state.settings.sync = cfg;
     state.syncStatus = null;
+    if (state.pendingLink) await completeLink();
   }
 
   async function clearSyncConfig() {
@@ -130,6 +132,16 @@ export function createActions(ctx) {
     }
     state.syncStatus = { status: data.status, warning: data.warning, updatedAt: data.updatedAt, nextRefreshAt: data.nextRefreshAt, consentExpiresAt: data.consentExpiresAt, added, checkedAt: Date.now() };
     return state.syncStatus;
+  }
+
+  // Retour de la banque : l'adresse de l'app contenait ?code=…&state=… à échanger contre une session.
+  async function completeLink() {
+    const link = state.pendingLink;
+    if (!link) return null;
+    syncConfig(); // sans serveur configuré, on garde le code en attente
+    state.pendingLink = null;
+    await syncFetch('/api/session', { method: 'POST', body: JSON.stringify(link) });
+    return syncNow();
   }
 
   // Ouvre la page de consentement de la banque ; on y revient sur l'app, puis syncNow() finalise.
@@ -197,5 +209,5 @@ export function createActions(ctx) {
     state.categories = state.categories.map((c) => (c.id === id ? updated : c));
   }
 
-  return { importBytes, importFile, syncNow, connectBank, saveSyncConfig, clearSyncConfig, recategorize, loadDemo, removeDemo, downloadBackup, readBackup, applyBackup, clearAll, saveCategory };
+  return { importBytes, importFile, syncNow, connectBank, completeLink, saveSyncConfig, clearSyncConfig, recategorize, loadDemo, removeDemo, downloadBackup, readBackup, applyBackup, clearAll, saveCategory };
 }
