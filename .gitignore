@@ -6,3 +6,7 @@ Thumbs.db
 .wrangler/
 .env
 data/
+
+# Clés privées : ne jamais les enregistrer dans le dépôt
+*.pem
+*.key

@@ -8,7 +8,7 @@ import { handle } from '../worker/src/index.js';
 const pair = await crypto.subtle.generateKey({ name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, true, ['sign', 'verify']);
 const der = new Uint8Array(await crypto.subtle.exportKey('pkcs8', pair.privateKey));
 export const TEST_PEM = `-----BEGIN PRIVATE KEY-----\n${Buffer.from(der).toString('base64').match(/.{1,64}/g).join('\n')}\n-----END PRIVATE KEY-----\n`;
-const APP_ID = '002ee6b7-3313-49f2-966e-f856478d7a3f';
+const APP_ID = '00000000-0000-4000-8000-000000000000';
 
 test('toCents sans erreur de flottant', () => {
   assert.equal(toCents('23.45'), 2345);
